@@ -1,0 +1,5 @@
+# A Python library to read/write Excel 2010 xlsx/xlsm files
+openpyxl
+
+# A Python library used for working with arrays
+numpy
