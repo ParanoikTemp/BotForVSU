@@ -39,5 +39,19 @@ class User(Model):  # Создание модели таблицы
         database = db
 
 
+class Teacher(Model):
+    name1 = TextField()
+    name2 = TextField()
+    name3 = TextField()
+    link = TextField()
+    desc = TextField()
+    photo = TextField(null=True)
+    rating = DoubleField(default=0)
+    voted = TextField(default="{}")
+
+    class Meta:
+        database = db
+
+
 if __name__ == '__main__':
-    db.create_tables([User])
+    db.create_tables([Teacher])

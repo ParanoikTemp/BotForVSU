@@ -1,0 +1,6 @@
+vkbottle
+pillow
+lxml
+beautifulsoup4
+requests
+peewee
