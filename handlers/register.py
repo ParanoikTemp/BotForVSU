@@ -6,6 +6,19 @@ from vkbottle import Keyboard, KeyboardButtonColor, Text
 from vkbottle.bot import Message
 
 
+# прерывание регистрации
+@labeler.message(text="!стоп")
+async def stop_register(message: Message):
+    event = await state_dispenser.get(message.peer_id)  # получаем стейт сейчас
+    if event and event.state.split(':')[0] == 'RegisterState':  # проверяем, является ли он регистрацией
+        kb = Keyboard()  # хреначим клаву
+        kb.add(Text("Начать"), color=KeyboardButtonColor.SECONDARY)
+        User.delete().where(User.user_id == message.from_id).execute()  # удаляем пользователя из бд
+        await state_dispenser.delete(message.peer_id)  # обнуляем диспенсер
+        await message.answer("Регистрация остановлена!\nЧтобы пройти регистрацию заного нажмите: \"Начать\"",
+                             keyboard=kb)
+
+
 # заполнение номера группы пользователя
 @labeler.message(state=RegisterState.GROUP)
 async def set_group(message: Message):
@@ -139,6 +152,7 @@ async def start(message: Message):
     kb.add(Text('Старый или сторонний клиент ВК'), color=KeyboardButtonColor.NEGATIVE)  # вторая кнопка
     User.create(user_id=message.from_id)  # создаем пользователя в бд
     await message.answer('Привет! Для начала давай сделаем небольшую регистрацию:\n'
+                         '(Если вдруг вы ошибетесь, напишите "!стоп")\n'
                          'Скажи, ты используешь обычный клиент ВК одной из последний версий, или ты '
                          'используешь сторонний клиент ВК или старую версию приложения?',
                          keyboard=kb)
