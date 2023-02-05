@@ -7,7 +7,7 @@ from typing import Union, Tuple, List
 class NotRegisterUserRule(ABCRule[Message]):  # класс правила для проверки регистрации пользователя (для первого раза)
     async def check(self, event: Message) -> bool:
         try:
-            User.get(User.user_id == event.from_id)  # если пользователь найден, то рулз не срабатывает
+            User.get(User.id == event.from_id)  # если пользователь найден, то рулз не срабатывает
             return False
         except User.DoesNotExist:  # Срабатывает если в коде сверху не нашелся запрос
             return True  # в противном случае он дает знать что пользователь новый
@@ -16,7 +16,7 @@ class NotRegisterUserRule(ABCRule[Message]):  # класс правила для
 class RegisteredUserRule(ABCRule[Message]):  # класс правила для проверки регистрации пользователя
     async def check(self, event: Message) -> bool:
         try:
-            return {"user": User.get(User.user_id == event.from_id)}  # если пользователь найден, то рулз его вернет
+            return {"user": User.get(User.id == event.from_id)}  # если пользователь найден, то рулз его вернет
         except User.DoesNotExist:  # Срабатывает если в коде сверху не нашелся запрос
             return False  # в противном случае он дает знать что пользователя нет
 
@@ -27,7 +27,7 @@ class InterfaceRule(ABCRule[Message]):  # класс правила которо
 
     async def check(self, event: Message) -> bool:
         try:
-            return User.get(User.user_id == event.from_id).low_interface == self.low
+            return User.get(User.id == event.from_id).low_interface == self.low
             # совпадает ли тип интерфейса с требуемым
         except User.DoesNotExist:  # если пользователь не найден
             return False
@@ -40,8 +40,8 @@ class RoleRule(ABCRule[Message]):  # класс правила который п
     async def check(self, event: Message) -> bool:
         try:
             if type(self.roles) is int:  # если передано только одно число
-                return User.get(User.user_id).role == self.roles  # сравниваем полностью
+                return User.get(User.id).role == self.roles  # сравниваем полностью
             else:  # иначе это список или кортеж
-                return User.get(User.user_id).role in self.roles  # тогда проверяем вхождение
+                return User.get(User.id).role in self.roles  # тогда проверяем вхождение
         except User.DoesNotExist:
             return False  # если пользователь не найден, то вовращаем false

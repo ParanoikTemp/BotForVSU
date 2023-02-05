@@ -13,7 +13,7 @@ async def stop_register(message: Message):
     if event and event.state.split(':')[0] == 'RegisterState':  # проверяем, является ли он регистрацией
         kb = Keyboard()  # хреначим клаву
         kb.add(Text("Начать"), color=KeyboardButtonColor.SECONDARY)
-        User.delete().where(User.user_id == message.from_id).execute()  # удаляем пользователя из бд
+        User.delete().where(User.id == message.from_id).execute()  # удаляем пользователя из бд
         await state_dispenser.delete(message.peer_id)  # обнуляем диспенсер
         await message.answer("Регистрация остановлена!\nЧтобы пройти регистрацию заного нажмите: \"Начать\"",
                              keyboard=kb)
@@ -23,7 +23,7 @@ async def stop_register(message: Message):
 @labeler.message(state=RegisterState.GROUP)
 async def set_group(message: Message):
     try:
-        user = User.get(User.user_id == message.from_id)  # проверяем существование группы
+        user = User.get(User.id == message.from_id)  # проверяем существование группы
         grp = Group.get(Group.course == user.course, Group.faculty == user.faculty, Group.number == int(message.text))
         user.group = grp  # если такая есть то записываем юзеру
         user.save()
@@ -45,7 +45,7 @@ async def set_course_num(message: Message):
     groups = Group.select().where(Group.course == char + num).execute()  # берем список групп с ступенью + курс
     if groups:  # Если такие есть то делаем
         groups_dict = dict()  # Это для экономии места при выводе списка факультетов
-        user = User.get(User.user_id == message.from_id)  # задаем пользователю его курс
+        user = User.get(User.id == message.from_id)  # задаем пользователю его курс
         user.course = char + num
         user.save()
         kb = Keyboard()  # заполняем клавиатуру номерами курсов
@@ -66,7 +66,7 @@ async def set_course_num(message: Message):
 # заполнение курса пользователя
 @labeler.message(state=RegisterState.COURSE_TYPE)
 async def set_course_type(message: Message):
-    user = User.get(User.user_id == message.from_id)
+    user = User.get(User.id == message.from_id)
     ctypes = {"Бакалавриат": "b", "Магистратура": "m", "Специалитет": "s", "Аспирантура": "a", "Докторантура": "d"}
     if ctypes.get(message.text) in user.faculty.courses:
         num = int(user.faculty.courses[user.faculty.courses.index(ctypes.get(message.text)) + 1])  # кол-во курсов
@@ -85,7 +85,7 @@ async def set_faculty(message: Message):
     try:
         await state_dispenser.set(message.peer_id, RegisterState.COURSE_TYPE)  # смена диспенсера
         fac = Faculty.get(Faculty.abbr == message.text)  # получаем строку факультета
-        user = User.get(User.user_id == message.from_id)  # устанавливаем пользователю факультет
+        user = User.get(User.id == message.from_id)  # устанавливаем пользователю факультет
         user.faculty = fac
         user.save()
         kb = Keyboard()  # генерируем клавиатуру
@@ -106,7 +106,7 @@ async def set_faculty(message: Message):
 # заполнение типа пользователя
 @labeler.message(state=RegisterState.USER_TYPE, text=('Студент', 'Сторонний пользователь'))
 async def set_user_type(message: Message):
-    user = User.get(User.user_id == message.from_id)  # получаем пользователя
+    user = User.get(User.id == message.from_id)  # получаем пользователя
     if message.text == 'Сторонний пользователь':  # Если пользователь сторонний, то заканчиваем регистрацию
         user.role = 0
         user.save()
@@ -128,7 +128,7 @@ async def set_user_type(message: Message):
 # Заполнение типа интерфейса
 @labeler.message(state=RegisterState.INTERFACE, text=('Официальный клиент ВК', 'Старый или сторонний клиент ВК'))
 async def set_interface_type(message: Message):
-    user = User.get(User.user_id == message.from_id)  # получаем пользователя
+    user = User.get(User.id == message.from_id)  # получаем пользователя
     if message.text == 'Официальный клиент ВК':  # устанавливаем тип клиента в зависимости от ответа
         user.low_interface = False
     else:
@@ -150,7 +150,7 @@ async def start(message: Message):
     kb.add(Text('Официальный клиент ВК'), color=KeyboardButtonColor.PRIMARY)  # первая кнопка
     kb.row()  # новый ряд
     kb.add(Text('Старый или сторонний клиент ВК'), color=KeyboardButtonColor.NEGATIVE)  # вторая кнопка
-    User.create(user_id=message.from_id)  # создаем пользователя в бд
+    User.create(id=message.from_id)  # создаем пользователя в бд
     await message.answer('Привет! Для начала давай сделаем небольшую регистрацию:\n'
                          '(Если вдруг вы ошибетесь, напишите "!стоп")\n'
                          'Скажи, ты используешь обычный клиент ВК одной из последний версий, или ты '

@@ -163,15 +163,15 @@ async def get_rate_teacher(event: MessageEvent):
     teacher = Teacher.get(Teacher.id == tc)  # получаем объект препода
     voted: list = json.loads(teacher.voted)  # получаем список проголосовавших
     for i, u in enumerate(voted):  # проверяем, голосовал ли человек раннее
-        if u[0] == event.user_id:  # если голосовал
-            voted[i] = [event.user_id, num]  # меняем раннее выставленную оценку
+        if u[0] == event.id:  # если голосовал
+            voted[i] = [event.id, num]  # меняем раннее выставленную оценку
             teacher.voted = json.dumps(voted)
             await event.edit_message(  # изменяем предыдущую оценку
                 f'Вы успешно изменили оценку преподавателю: {num}\n{teacher.name1} {teacher.name2}'
                 f' {teacher.name3}')
             break
     else:  # если раннее не голосовал
-        voted.append([event.user_id, num])  # добавляем голос человека
+        voted.append([event.id, num])  # добавляем голос человека
         teacher.voted = json.dumps(voted)
         await event.edit_message(f'Вы успешно поставили оценку преподавателю: {num}\n{teacher.name1} {teacher.name2}'
                                  f' {teacher.name3}')  # меняем сообщение
